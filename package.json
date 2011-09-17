@@ -1,0 +1,17 @@
+{
+  "name": "db",
+  "version": "1.0.0",
+  "description" : "Common interface to mysql, mongodb, and redis",
+  "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/sleeplessinc/db/raw/master/LICENSE"
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://sleeplessinc@github.com/sleeplessinc/db.git"
+    }
+  ],
+  "repository": "git://github.com/sleeplessinc/db.git"
+}
