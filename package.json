@@ -7,10 +7,10 @@
     "type": "MIT",
     "url": "https://github.com/sleeplessinc/db/raw/master/LICENSE"
   },
-  "repository": { "type": "git", "url": "https://sleeplessinc@github.com/sleeplessinc/db.git" }
+  "repository": { "type": "git", "url": "https://sleeplessinc@github.com/sleeplessinc/db.git" },
   "dependencies": {
   	"mysql": "0.9.4",
   	"redis": "0.6.7",
-  	"ds": "1.2.0",
+  	"ds": "1.2.0"
   }
 }
