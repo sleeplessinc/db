@@ -1,17 +1,16 @@
 {
   "name": "db",
   "version": "1.0.0",
-  "description" : "Common interface to mongodb and redis",
+  "description": "Easy access to mongodb, redis, or ds",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {
     "type": "MIT",
     "url": "https://github.com/sleeplessinc/db/raw/master/LICENSE"
   },
-  "repositories": [
-    {
-      "type": "git",
-      "url": "https://sleeplessinc@github.com/sleeplessinc/db.git"
-    }
-  ],
-  "repository": "git://github.com/sleeplessinc/db.git"
+  "repository": { "type": "git", "url": "https://sleeplessinc@github.com/sleeplessinc/db.git" }
+  "dependencies": {
+  	"mysql": "0.9.4",
+  	"redis": "0.6.7",
+  	"ds": "1.2.0",
+  }
 }
