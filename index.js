@@ -7,17 +7,27 @@ log(5)
 
 var dirty = false;
 
-var ds = new require("ds").DS()
+var DS = require("ds").DS
+var ds = new DS()
 
-function set(cb, k, v, ttl) {
-	ttl = ttl || 0
-	ds[k] = v
+function set(cb, k, v) {
+
+	if( !k ) {
+		cb( { error : "Bad key "+k } )
+		return
+	}
+
+	if(v === undefined)
+		v = null
+
 	dirty = true
-	cb( null )
+	ds[k] = v
+
+	cb(null)
 }
 function get(cb, k) {
-	var v = ds[k]
-	cb( ds[k] );
+	var v = ds[k] || null
+	cb( v );
 }
 
 function del(cb, k) {
@@ -37,11 +47,10 @@ rpc.log(5)
 
 setInterval(function tick() {
 	if(dirty) {
+		log(5, "((ds saving))")
 		ds.save();
 		dirty = false;
 	}
 }, 5*1000)
-
-
 
 
