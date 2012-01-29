@@ -1,1 +1,1 @@
-../node_modules/rpc/docroot/rpc.js
+../../node_modules/rpc/docroot/rpc.js
