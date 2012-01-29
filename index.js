@@ -23,11 +23,11 @@ function set(cb, k, v) {
 	dirty = true
 	ds[k] = v
 
-	cb(null)
+	cb({})
 }
 function get(cb, k) {
 	var v = ds[k] || null
-	cb( v );
+	cb( { value : v } )
 }
 
 function del(cb, k) {
