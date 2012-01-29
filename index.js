@@ -23,16 +23,17 @@ function set(cb, k, v) {
 	dirty = true
 	ds[k] = v
 
-	cb({})
+	cb(null)
 }
 function get(cb, k) {
 	var v = ds[k] || null
-	cb( { value : v } )
+	cb( v )
 }
 
 function del(cb, k) {
 	delete ds[k]
 	dirty = true;
+	cb(null)
 }
 
 var api = {
