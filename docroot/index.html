@@ -1,0 +1,25 @@
+<html>
+<head>
+	<script src=rpc.js></script>
+	<script src=db.js></script>
+
+</head>
+<body>
+
+	<input type=button value=clickme onclick="clicked('sm')">
+
+	<script>
+
+		w = function(s) { document.write(s+"<br>") }
+
+		w("foo");
+
+
+		function clicked() {
+			db.get("foo", function(v) {
+				alert(v)
+			})
+		}
+	</script>
+
+
