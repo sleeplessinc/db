@@ -1,7 +1,7 @@
 {
   "name": "db",
-  "version": "1.0.2",
-  "description": "Easy access to mongodb, redis, or ds",
+  "version": "1.0.4",
+  "description": "Easy access to dynamo, ds, mongodb, redis",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {
     "type": "MIT",

@@ -4,3 +4,15 @@ This module sponsored by [Sleepless Inc. (sleepless.com)](http://sleepless.com/)
 This will hopefully have a common interface for the
 "least common denominator" functions of each db soon.
 
+
+auth	authenticate
+list	list tables
+desc	describe table
+put		put item
+upd		update item
+get		get item
+del		delete item
+qry		query
+scan	scan
+mget	batch get
+
