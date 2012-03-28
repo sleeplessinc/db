@@ -2,17 +2,23 @@
 This module sponsored by [Sleepless Inc. (sleepless.com)](http://sleepless.com/)
 
 This will hopefully have a common interface for the
-"least common denominator" functions of each db soon.
+"least common denominator" functions of each NoSQL db soon.
+
+To support:
+
+	AWS DynamoDB
+	MongoDB
 
 
-auth	authenticate
-list	list tables
-desc	describe table
-put		put item
-upd		update item
-get		get item
-del		delete item
-qry		query
-scan	scan
-mget	batch get
+API
+	authenticate
+	list tables
+	describe table
+	put item
+	update item
+	get item
+	delete item
+	query
+	scan
+	batch get
 
