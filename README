@@ -11,14 +11,16 @@ To support:
 
 
 API
-	authenticate
-	list tables
-	describe table
-	put item
-	update item
-	get item
-	delete item
-	query
-	scan
-	batch get
+	ListTables
+	CreateTable
+	DescribeTable
+	UpdateTable
+	DeleteTable
+	PutItem
+	GetItem
+	UpdateItem
+	BatchGetItem
+	DeleteItem
+	Query
+	Scan
 

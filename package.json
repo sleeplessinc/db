@@ -1,6 +1,6 @@
 {
   "name": "db",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Easy access to dynamo, ds, mongodb, redis",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {
@@ -11,6 +11,7 @@
   "dependencies": {
   	"mysql": "0.9.4",
   	"redis": "0.6.7",
-  	"ds": "1.2.0"
+  	"ds": "1.2.0",
+  	"aws-sdk": "0.9.7-pre.8"
   }
 }

@@ -1,6 +1,8 @@
 
 //var mongodb = require("mongodb")
 //var redis = require("redis")
+var aws = require("aws-sdk")
+
 var log = require("log5").mkLog("db:")
 log(5)
 
