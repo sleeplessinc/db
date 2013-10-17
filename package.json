@@ -1,6 +1,6 @@
 {
   "name": "db",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Easy access to dynamo, ds, mongodb, redis",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {

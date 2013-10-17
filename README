@@ -8,6 +8,43 @@ To support:
 
 	AWS DynamoDB
 	MongoDB
+	JSON
+	Filesystem
+
+
+Interfaces
+
+	authenticate( user, pass, callback() )
+
+	create( data, callback( new_record_id ) )
+
+	read( criteria, callback( records_matched[] )  )
+
+	update( criteria, data, callback( num_updated ) )
+
+	delete( criteria, callback( num_deleted ) )
+
+
+	Example:
+
+		db.authenticate( "joe", "foo", function( error, dbss ) {
+			dbss.create( {name:"bob"}, function( error ) {
+				dbss.read( { name: "b.*" }, function( error, records ) {
+					records.forEach( function( rec ) {
+						print( rec.name )	// "barbara", "bob", "bosworth", etc.
+						if( rec.name == "bob" ) {
+							rec.name = "robert"
+							dbss.update( {id:rec.id}, rec, function( error ) {
+								dbss.delete( {id:rec.id}, function( error ) {
+									print( "robert rec deleted" )
+								})
+							})
+						}
+					})
+				})
+			})
+		})
+
 
 
 API
