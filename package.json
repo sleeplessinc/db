@@ -1,17 +1,21 @@
 {
   "name": "db",
-  "version": "1.0.6",
-  "description": "Easy access to dynamo, ds, mongodb, redis",
+  "version": "1.0.7",
+  "description": "Easy access to dynamo, ds, mongodb, redis, freekey",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {
     "type": "MIT",
     "url": "https://github.com/sleeplessinc/db/raw/master/LICENSE"
   },
-  "repository": { "type": "git", "url": "https://sleeplessinc@github.com/sleeplessinc/db.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://sleeplessinc@github.com/sleeplessinc/db.git"
+  },
   "dependencies": {
-  	"mysql": "0.9.4",
-  	"redis": "0.6.7",
-  	"ds": "1.2.0",
-  	"aws-sdk": "0.9.7-pre.8"
+    "aws-sdk": "0.9.7-pre.8",
+    "ds": "1.2.0",
+    "freekey": "^1.0.2",
+    "mysql": "0.9.4",
+    "redis": "0.6.7"
   }
 }

@@ -1,8 +1,9 @@
 
-This module sponsored by [Sleepless Inc. (sleepless.com)](http://sleepless.com/)
+This module sponsored by Sleepless Inc. / sleepless.com
 
-This will hopefully have a common interface for the
-"least common denominator" functions of each NoSQL db soon.
+Intention is to practical, common interface for the
+"least common denominator" functions of most common document based
+data stores.
 
 To support:
 
@@ -10,6 +11,7 @@ To support:
 	MongoDB
 	JSON
 	Filesystem
+	FreeKey
 
 
 Interfaces
