@@ -31,7 +31,12 @@ m.connect = function( opts ) {
 	let db = {};
 
 	db.query = function( sql, args, cb ) {
-		cnx.query( sql, args, cb );
+		cnx.query( sql, args, ( err, rs ) => {
+			if( err && opts.cb_err ) {
+				opts.cb_err( err );
+			}
+			cb( err, rs );
+		});
 		return db;
 	};
 
@@ -40,33 +45,27 @@ m.connect = function( opts ) {
 	}
 
 	db.get_recs = function( sql, args, cb ) {
-		return db.query( sql, args, function( err, rows ) {
+		return db.query( sql, args, ( err, rows ) => {
 			cb( err, err ? [] : rows );
 		});
 	}
 
 	db.get_one_rec = function( sql, args, cb ) {
-		return db.get_recs( sql, args, function( err, rows ) {
+		return db.get_recs( sql, args, ( err, rows ) => {
 			cb( err, rows[ 0 ] );
 		});
 	}
 	db.get_one = db.get_one_rec;
 
 	db.update = function(sql, args, cb) {
-		return db.query( sql, args, function( err, res ) {
+		return db.query( sql, args, ( err, res ) => {
 			cb( err, err ? 0 : res.affectedRows, res );
 		});
 	}
 
-	db.insert = function(sql, args, cb) {
-		return db.query( sql, args, function( err, res ) {
-			cb( err, err ? null : res.insertId, res );
-		});
-	}
-
-	db.insertObj = function(obj, table, cb) {
+	db.insert_obj = function(obj, table, cb) {
 		let sql = "select distinct(column_name), data_type from information_schema.columns where table_schema = ? and table_name = ?";
-		return db.query( sql, [ opts.database, table ], function( err, res ) {
+		return db.query( sql, [ opts.database, table ], ( err, res ) => {
 			if( err ) {
 				cb( err, null );
 				return;
@@ -99,8 +98,17 @@ m.connect = function( opts ) {
 		});
 	}
 
+	db.insert = function(sql, args, cb) {
+		if( typeof sql === "object" && typeof args === "string" ) {
+			return db.insert_obj( sql, args, cb );
+		}
+		return db.query( sql, args, ( err, res ) => {
+			cb( err, err ? null : res.insertId, res );
+		});
+	}
+
 	db.delete = function( sql, args, cb ) {
-		return db.query( sql, args, function( err, res ) {
+		return db.query( sql, args, ( err, res ) => {
 			cb( err, err ? null : res.affectedRows, res );
 		});
 	}
