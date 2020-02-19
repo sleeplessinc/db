@@ -20,3 +20,14 @@ db.insert( stuff, { name: sha1(""+time()) }, new_id => {
 }, fail );
 
 
+//
+opts = {
+	accessKeyId: process.env[ "AWS_ACCESS_KEY_ID" ],
+	secretAccessKey: process.env[ "AWS_SECRET_ACCESS_KEY" ],
+};
+dump( opts );
+db = require( "./index.js" ).dynamodb.connect( opts );
+
+
+
+

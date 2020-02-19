@@ -30,5 +30,7 @@ exports.mysql = require( "./mysql.js" );
 
 exports.ds = require( "./ds.js" );
 
+exports.dynamodb = require( "./dynamodb.js" );
+
 
 
