@@ -44,13 +44,8 @@ exports.connect = function( opts, cb ) {
 		}
 	};
 
-	let remove = function( coll_name, id, okay, fail ) {
+	let remove = function( coll_name, criteria, okay, fail ) {
 		try {
-
-			id = toInt( id );
-			if( id === 0 ) {
-				return okay( 0 );
-			}
 
 			// Grab the collection object, creating it if needed.
 			let coll = data.collections[ coll_name ];
@@ -58,8 +53,20 @@ exports.connect = function( opts, cb ) {
 				throw new Error( "No such collection: " + coll_name );
 			}
 
-			let affected = coll[ id ] !== undefined ? 1 : 0;
-			delete coll[ id ];
+			let affected = 0;
+			for( let id in coll ) {
+				let rec = coll[ id ];
+				let match = true;
+				for( let k in criteria ) {
+					if( ! criteria[ k ].test( rec[ k ] ) ) {
+						match = false;
+						break;
+					}
+				}
+
+				delete coll[ id ];
+				affected += 1;
+			}
 
 			if( affected > 0 ) {
 				if( fname )  {

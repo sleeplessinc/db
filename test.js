@@ -14,11 +14,9 @@ function fail( a ) {
 stuff = "stuff";
 db = require( "./index.js" ).ds.connect( { filename: "foo.json" } );
 db.insert( stuff, { name: sha1(""+time()) }, new_id => {
-	db.select( stuff, { name: /./ }, okay, fail );
-	db.remove( stuff, 3, okay, fail );
-	db.select( stuff, { name: /./ }, okay, fail );
-	db.update( stuff, { id: 1, name: "bob" }, okay, fail ); 
-	db.select( stuff, { name: /./ }, okay, fail );
+	db.select( stuff, {}, okay, fail );
+	db.remove( stuff, { name: /4f/ }, okay, fail );
+	db.select( stuff, {}, okay, fail );
 }, fail );
 
 
