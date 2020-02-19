@@ -22,11 +22,13 @@ db.insert( stuff, { name: sha1(""+time()) }, new_id => {
 
 //
 opts = {
+	region: "us-west-2",
 	accessKeyId: process.env[ "AWS_ACCESS_KEY_ID" ],
 	secretAccessKey: process.env[ "AWS_SECRET_ACCESS_KEY" ],
 };
 dump( opts );
 db = require( "./index.js" ).dynamodb.connect( opts );
+db.tables( okay, fail );
 
 
 

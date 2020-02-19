@@ -7,12 +7,12 @@ AWS = require( "aws-sdk" );
 
 exports.connect = function( opts ) {
 
-	AWS.config.update( { region: opts.region, endpoint: opts.endpoint } );
+	//AWS.config.update( opts );
 
-	let ddb = new AWS.DynamoDB();
+	let ddb = new AWS.DynamoDB( opts );
 
-	let tables = function( params, okay, fail ) {
-		ddb.listTables( params, ( error, data ) => {
+	let tables = function( okay, fail ) {
+		ddb.listTables( ( error, data ) => {
 			if( error ) {
 				fail( error );
 			}
@@ -40,6 +40,7 @@ exports.connect = function( opts ) {
 
 
 
+/*
 var AWS = require('aws-sdk');
 
 AWS.config.update({
@@ -62,6 +63,6 @@ db.client.listTables(function(err, data) {
 		console.log(data.TableNames); 
 	}
 });
-
+*/
 
 
