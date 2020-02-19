@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "aws-sdk": "0.9.7-pre.8",
-    "ds": "1.2.0",
+    "ds": "^1.2.0",
     "freekey": "^1.0.2",
     "mysql": "^2.18.1",
     "redis": "0.6.7",

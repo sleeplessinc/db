@@ -1,48 +1,49 @@
 
 # DB
 
-This module sponsored by Sleepless Inc. / sleepless.com
+Copyright 2020 Sleepless Software Inc. All Rights Reserved
 
-Intention is to practical, common interface for the
-"least common denominator" functions of most common document based
-data stores.
+
+# About
+
+A practical, common interface for talking to most common databases.
 
 To support:
 
 	AWS DynamoDB
 	Google FireBase
 	MongoDB
-	MySQL/MariaDB
-	JSON
-	Filesystem
 	FreeKey
+	DS (file-system based JSON)
 
 
 ## Interfaces
 
-	authenticate( user, pass, callback() )
+The form of criteria and matching records may vary depending on the database used.
 
-	create( data, callback( new_record_id ) )
+	connect( options, callback() )
 
-	find( criteria, callback( records_matched[] )  )
+	insert( data, callback( new_record_id ) )
+
+	select( criteria, callback( records_matched[] )  )
 
 	update( criteria, data, callback( num_updated ) )
 
-	delete( criteria, callback( num_deleted ) )
+	remove( criteria, callback( num_removed ) )
 
 
 ## Example:
 
-	db.authenticate( "joe", "foo", function( error, dbss ) {
-		dbss.create( {name:"bob"}, function( error ) {
-			dbss.find( { name: /^bob/ }, function( error, records ) {
+	require( "db" ).mysql.connect( { username: "joe", password: "foo" }, function( error, db ) {
+		db.insert( {name:"bob"}, function( error, insert_id ) {
+			db.select( { name: /^[Bb]/ }, function( error, records ) {
 				records.forEach( function( rec ) {
-					print( rec.name )	// "barbara", "bob", "bosworth", etc.
+					console.log( rec.name )	// "barbara", "bobby", "blaine", etc.
 					if( rec.name == "bob" ) {
 						rec.name = "robert"
-						dbss.update( {id:rec.id}, rec, function( error ) {
-							dbss.delete( {id:rec.id}, function( error ) {
-								print( "robert rec deleted" )
+						db.update( {id:rec.id}, rec, function( error ) {
+							db.remove( {id:rec.id}, function( error ) {
+								console.log( "robert rec remove" )
 							})
 						})
 					}

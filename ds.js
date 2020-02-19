@@ -1,59 +1,114 @@
 
-//var mongodb = require("mongodb")
-//var redis = require("redis")
-var aws = require("aws-sdk")
+sleepless = require( "sleepless" );
 
-var log = require("log5").mkLog("db:")
-log(5)
+DS = require( "ds" ).DS;
 
+exports.connect = function( opts, cb ) {
 
-var dirty = false;
+	let fname = opts.filename;
 
-var DS = require("ds").DS
-var ds = new DS()
-
-function set(cb, k, v) {
-
-	if( !k ) {
-		cb( { error : "Bad key "+k } )
-		return
+	let data = new DS( fname );
+	if( ! data.auto_increment ) {
+		data.auto_increment = 0;
+		data.collections = {};
 	}
 
-	if(v === undefined)
-		v = null
+	let insert = function( coll_name, obj, okay, fail ) {
+		try {
 
-	dirty = true
-	ds[k] = v
+			// Clone the data object
+			let json = JSON.stringify( obj );	// may throw
+			obj = JSON.parse( json );	
 
-	cb(null)
-}
-function get(cb, k) {
-	var v = ds[k] || null
-	cb( v )
-}
+			// Grab id, make sure it's a valid integer, create a new, unique one if needed.
+			let id = toInt( obj.id ) || ++data.auto_increment;
+			obj.id = id;
 
-function del(cb, k) {
-	delete ds[k]
-	dirty = true;
-	cb(null)
-}
+			// Grab the collection object, creating it if needed.
+			let coll = data.collections[ coll_name ];
+			if( coll === undefined ) {
+				coll = data.collections[ coll_name ] = {};
+			}
 
-var api = {
-	 set: set,
-	 get: get,
-	 del: del,
-}
+			coll[ id ] = obj;	// Put it in the data store.
 
-var rpc = require("rpc")
-rpc.createServer(api).listen(12345)
-rpc.log(5)
+			if( fname ) {
+				data.save();	// Save to disk.
+			}
 
-setInterval(function tick() {
-	if(dirty) {
-		log(5, "((ds saving))")
-		ds.save();
-		dirty = false;
-	}
-}, 5*1000)
+			okay( id );
 
+		}
+		catch( error ) {
+			fail( error );
+		}
+	};
+
+	let remove = function( coll_name, id, okay, fail ) {
+		try {
+
+			id = toInt( id );
+			if( id === 0 ) {
+				return okay( 0 );
+			}
+
+			// Grab the collection object, creating it if needed.
+			let coll = data.collections[ coll_name ];
+			if( coll === undefined ) {
+				throw new Error( "No such collection: " + coll_name );
+			}
+
+			let affected = coll[ id ] !== undefined ? 1 : 0;
+			delete coll[ id ];
+
+			if( affected > 0 ) {
+				if( fname )  {
+					data.save();	// Save to disk.
+				}
+			}
+
+			okay( affected );
+
+		}
+		catch( error ) {
+			fail( error );
+		}
+	};
+
+	let select = function( coll_name, criteria, okay, fail  ) {
+
+		// Grab the collection object, creating it if needed.
+		let coll = data.collections[ coll_name ];
+		if( coll === undefined ) {
+			throw new Error( "No such collection: " + coll_name );
+		}
+
+		let found = {};
+		for( let id in coll ) {
+			let rec = coll[ id ];
+			let match = true;
+			for( let k in criteria ) {
+				if( ! criteria[ k ].test( rec[ k ] ) ) {
+					match = false;
+					break;
+				}
+			}
+			if( match ) {
+				found[ id ] = rec;
+			}
+		}
+
+		okay( found );
+
+	};
+
+	let update = function( coll_name, obj, okay, fail ) {
+		remove( coll_name, obj.id, aff => {
+			insert( coll_name, obj, okay, fail );
+		}, fail );
+	};
+
+	return { insert, select, update, remove, };
+
+};
 
