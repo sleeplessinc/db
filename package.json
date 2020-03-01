@@ -12,7 +12,7 @@
     "url": "https://sleeplessinc@github.com/sleeplessinc/db.git"
   },
   "dependencies": {
-    "aws-sdk": "^2.622.0",
+    "aws-sdk": "^2.630.0",
     "ds": "^1.4.2",
     "freekey": "^1.1.0",
     "mysql": "^2.18.1",
