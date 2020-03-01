@@ -3,6 +3,7 @@
 sleepless = require( "sleepless" );
 
 AWS = require( "aws-sdk" );
+AWS.config.loadFromPath('./aws_config.json');
 
 
 exports.connect = function( opts ) {
@@ -38,6 +39,34 @@ exports.connect = function( opts ) {
 
 };
 
+
+if(require && require.main === module) {
+	// this module is being executed directly
+	//require('./test.js')
+	//
+	//opts = {
+	//	region: "us-west-2",
+	//	accessKeyId: process.env[ "AWS_ACCESS_KEY_ID" ],
+	//	secretAccessKey: process.env[ "AWS_SECRET_ACCESS_KEY" ],
+	//};
+
+	function okay( a ) {
+		log( "OKAY: " + o2j(a) );
+	}
+	function fail( a ) {
+		console.warn( "FAIL: " + o2j(a) );
+	}
+
+	opts = {
+		region: "us-west-2",
+		accessKeyId: process.env[ "AWS_ACCESS_KEY_ID" ],
+		secretAccessKey: process.env[ "AWS_SECRET_ACCESS_KEY" ],
+	};
+
+	db = require( "./index.js" ).dynamodb.connect( );
+	db.tables( okay, fail );
+
+}
 
 
 /*
