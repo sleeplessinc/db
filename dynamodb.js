@@ -84,7 +84,7 @@ if( require && require.main === module ) {
 
 	db = require( "./index.js" ).dynamodb.connect( );
 	db.tables( fin );
-	//db.createTable( "foobs", fin );
+	//db.createTable( "sessions", fin );
 	//db.deleteTable( "foobs", fin );
 	//db.putItem( "users", { id: 4, name: "Sally" }, fin );
 	//db.getItem( "users", { id: 4 }, fin );
