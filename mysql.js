@@ -32,9 +32,7 @@ m.connect = function( opts ) {
 
 	db.query = function( sql, args, cb ) {
 		cnx.query( sql, args, ( err, rs ) => {
-			if( err && opts.cb_err ) {
-				opts.cb_err( err );
-			}
+			if( err && opts.cb_err ) { opts.cb_err( err ); }	// XXX DEPRECATE this
 			cb( err, rs );
 		});
 		return db;

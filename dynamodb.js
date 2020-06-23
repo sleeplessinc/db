@@ -58,12 +58,17 @@ exports.connect = function( opts ) {
 		dc.get( params, cb );
 	}
 
+	let query = function( params, key, cb ) {
+		ddb.query( params, cb );
+	}
+
 	return { 
 		tables,
 		createTable,
 		deleteTable,
 		putItem,
 		getItem,
+		query,
 	};
 
 };
