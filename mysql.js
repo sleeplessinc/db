@@ -26,7 +26,11 @@ let m = {};
 
 m.connect = function( opts ) {
 
-	let cnx = require( "mysql" ).createPool( opts );
+	let cnx = m._cnx;	// look for an already created pool
+	if( ! cnx ) {		// if not present ... 
+		cnx = require( "mysql" ).createPool( opts );	// create one
+		m._cnx = cnx;	// and store it for future calls into this function
+	}
 
 	let db = {};
 
