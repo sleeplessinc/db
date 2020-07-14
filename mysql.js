@@ -44,6 +44,7 @@ m.connect = function( opts ) {
 
 	db.end = function() {
 		cnx.end();
+		cnx = m._cnx = null;
 	}
 
 	db.get_recs = function( sql, args, cb ) {

@@ -32,4 +32,23 @@ db.tables( okay, fail );
 
 
 
+opts = {
+	"host": "localhost",
+	"user": "bustle",
+	"password": "password", 
+	"database": "database_name"
+}
+dump( opts );
+db = require( "./index.js" ).mysql.connect( opts );
+db.get_one( "select ?", [ 7 ], ( e, r ) => {
+	if( e ) {
+		fail( e );
+	} else {
+		okay( r );
+	}
+	db.end();
+});
+
+
+
 
