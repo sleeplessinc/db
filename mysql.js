@@ -43,9 +43,15 @@ function connect( opts, okay, fail ) {
 		db.query = function( sql, args, okay, fail ) {
 			cnx.query( sql, args, ( err, res ) => {
 				if( err ) {
-					fail( err );
+					if( fail ) {
+						fail( err );
+					} else {
+						throw err;
+					}
 				} else {
-					okay( res );
+					if( okay ) {
+						okay( res );
+					}
 				}
 			});
 			return db;
