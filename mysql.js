@@ -20,117 +20,123 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE. 
 */
 
-let sleepless = require( "sleepless" );
+const mysql = require( "mysql" );
+const sleepless = require( "sleepless" );
 
-let m = {};
+function connect( opts, okay, fail ) {
 
-m.connect = function( opts ) {
+	let cnx = mysql.createConnection( opts ); 
+	cnx.connect( err => {
 
-	let cnx = m._cnx;	// look for an already created pool
-	if( ! cnx ) {		// if not present ... 
-		cnx = require( "mysql" ).createPool( opts );	// create one
-		m._cnx = cnx;	// and store it for future calls into this function
-	}
-
-	let db = {};
-
-	db.query = function( sql, args, cb ) {
-		cnx.query( sql, args, ( err, rs ) => {
-			if( err && opts.cb_err ) { opts.cb_err( err ); }	// XXX DEPRECATE this
-			cb( err, rs );
-		});
-		return db;
-	};
-
-	db.end = function() {
-		cnx.end();
-		cnx = m._cnx = null;
-	}
-
-	db.get_recs = function( sql, args, cb ) {
-		return db.query( sql, args, ( err, rows ) => {
-			cb( err, err ? [] : rows );
-		});
-	}
-
-	db.get_one_rec = function( sql, args, cb ) {
-		return db.get_recs( sql, args, ( err, rows ) => {
-			cb( err, rows[ 0 ] );
-		});
-	}
-	db.get_one = db.get_one_rec;
-
-	db.update = function(sql, args, cb) {
-		return db.query( sql, args, ( err, res ) => {
-			cb( err, err ? 0 : res.affectedRows, res );
-		});
-	}
-
-	db.insert_obj = function(obj, table, cb) {
-		let sql = "select distinct(column_name), data_type from information_schema.columns where table_schema = ? and table_name = ?";
-		return db.query( sql, [ opts.database, table ], ( err, res ) => {
-			if( err ) {
-				cb( err, null );
-				return;
-			}
-
-			let fields = [];
-			let qmarks = [];
-			let vals = [];
-
-			for( let i = 0 ; i < res.length ; i++ ) {
-				let c = res[ i ].column_name;
-				val = obj[ c ];
-				if( val !== undefined ) {
-					fields.push( "`" + c + "`" );
-					qmarks.push( "?" );
-					let v = obj[ c ];
-					if( res[ i ].data_type == "timestamp" && typeof v == "number" ) {
-						v = ts2my( v );
-					}
-					else
-					if( typeof v === "object" ) {
-						v = o2j( v );
-					}
-					vals.push( v );
-				}
-			}
-
-			let sql = "insert into " + table + " (" + fields.join( "," ) + ") values (" + qmarks.join( "," ) + ")";
-			db.insert( sql, vals, cb );
-		});
-	}
-
-	db.insert = function(sql, args, cb) {
-		if( typeof sql === "object" && typeof args === "string" ) {
-			return db.insert_obj( sql, args, cb );
+		if( err ) {
+			fail( err );
+			return;
 		}
-		return db.query( sql, args, ( err, res ) => {
-			cb( err, err ? null : res.insertId, res );
-		});
-	}
+			
+		let db = {};
 
-	db.delete = function( sql, args, cb ) {
-		return db.query( sql, args, ( err, res ) => {
-			cb( err, err ? null : res.affectedRows, res );
-		});
-	}
+		db.end = function() {
+			cnx.end();
+			cnx = null;
+		}
 
-	db.start = function( cb ) {
-		return db.query( "start transaction", [], cb );
-	}
+		db.query = function( sql, args, okay, fail ) {
+			cnx.query( sql, args, ( err, res ) => {
+				if( err ) {
+					fail( err );
+				} else {
+					okay( res );
+				}
+			});
+			return db;
+		};
 
-	db.commit = function( cb ) {
-		return db.query( "commit", [], cb );
-	}
+		db.get_recs = function( sql, args, okay, fail ) {
+			return db.query( sql, args, ( rows ) => {
+				okay( rows );
+			}, fail);
+		}
 
-	db.rollback = function( cb ) {
-		return db.query("rollback", [], cb);
-	}
+		db.get_one_rec = function( sql, args, okay, fail ) {
+			return db.get_recs( sql, args, ( rows ) => {
+				okay( rows[ 0 ] );
+			}, fail);
+		}
+		db.get_one = db.get_one_rec;
 
-	return db;
+		db.update = function(sql, args, okay, fail) {
+			return db.query( sql, args, res => {
+				okay( res.affectedRows );
+			}, fail);
+		}
+
+		db.insert_obj = function(obj, table, okay, fail) {
+			let sql = "select distinct(column_name), data_type from information_schema.columns where table_schema = ? and table_name = ?";
+			return db.query( sql, [ opts.database, table ], res => {
+				let fields = [];
+				let qmarks = [];
+				let vals = [];
+
+				for( let i = 0 ; i < res.length ; i++ ) {
+					let c = res[ i ].column_name;
+					val = obj[ c ];
+					if( val !== undefined ) {
+						fields.push( "`" + c + "`" );
+						qmarks.push( "?" );
+						let v = obj[ c ];
+						if( res[ i ].data_type == "timestamp" && typeof v == "number" ) {
+							v = ts2my( v );
+						}
+						else
+						if( typeof v === "object" ) {
+							v = o2j( v );
+						}
+						vals.push( v );
+					}
+				}
+
+				let sql = "insert into " + table + " (" + fields.join( "," ) + ") values (" + qmarks.join( "," ) + ")";
+				db.insert( sql, vals, okay, fail );
+			}, fail);
+		}
+
+		db.insert = function(sql, args, okay, fail) {
+			if( typeof sql === "object" && typeof args === "string" ) {
+				return db.insert_obj( sql, args, okay, fail );
+			}
+			return db.query( sql, args, res => {
+				okay( res.insertId );
+			}, fail );
+		}
+
+		db.delete = function( sql, args, okay, fail ) {
+			return db.query( sql, args, res => {
+				okay( res.affectedRows );
+			}, fail );
+		}
+
+		// XXX This shit doesn't seem to work.
+		/*
+		db.start = function( okay, fail ) {
+			return db.query( "start transaction", [], okay, fail );
+		}
+
+		db.commit = function( okay, fail ) {
+			return db.query( "commit", [], okay, fail );
+		}
+
+		db.rollback = function( okay, fail ) {
+			return db.query("rollback", [], okay, fail);
+		}
+		*/
+
+		okay( db );
+
+	});
+
 };
 
-module.exports = m;
+module.exports = { connect };
+
 
 
