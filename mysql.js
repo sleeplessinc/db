@@ -77,7 +77,7 @@ function connect( opts, okay, fail ) {
 		}
 
 		db.insert_obj = function(obj, table, okay, fail) {
-			let sql = "select distinct(column_name), data_type from information_schema.columns where table_schema = ? and table_name = ?";
+			let sql = "select distinct(column_name) as column_name, data_type as data_type from information_schema.columns where table_schema = ? and table_name = ?";
 			return db.query( sql, [ opts.database, table ], res => {
 				let fields = [];
 				let qmarks = [];
