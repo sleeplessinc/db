@@ -77,6 +77,7 @@ function connect( opts, okay, fail ) {
 		}
 
 		db.insert_obj = function(obj, table, okay, fail) {
+			throw new Error( "Do not use db.insert with objects ... it's broken" );
 			let sql = "select distinct(column_name) as column_name, data_type as data_type from information_schema.columns where table_schema = ? and table_name = ?";
 			return db.query( sql, [ opts.database, table ], res => {
 				let fields = [];
