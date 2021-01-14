@@ -1,5 +1,6 @@
 
 sleepless = require( "sleepless" );
+sleepless.globalize();
 
 DS = require( "ds" ).DS;
 

@@ -1,6 +1,7 @@
 
 
 sleepless = require( "sleepless" );
+sleepless.globalize();
 
 AWS = require( "aws-sdk" );
 AWS.config.loadFromPath('./aws_config.json');	// XXX

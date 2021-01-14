@@ -1,6 +1,6 @@
 {
   "name": "db",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "Easy access to dynamo, ds, mongodb, redis, freekey",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {
@@ -18,6 +18,6 @@
     "mysql": "^2.18.1",
     "redis": "^3.0.2",
     "runq": "^1.1.2",
-    "sleepless": "^2.7.2"
+    "sleepless": "^3.8.0"
   }
 }

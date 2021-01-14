@@ -1,5 +1,6 @@
 
 require( "sleepless" );
+sleepless.globalize();
 
 inspect = function( o, d ) { return require( "util" ).inspect( o, d ) }
 dump = function( o, d ) { log( inspect( o, d ) ); }

@@ -22,6 +22,7 @@ IN THE SOFTWARE.
 
 const mysql = require( "mysql" );
 const sleepless = require( "sleepless" );
+sleepless.globalize();
 
 function connect( opts, okay, fail ) {
 
