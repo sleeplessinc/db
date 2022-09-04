@@ -27,6 +27,7 @@ exports.connect = function(type, cfg) {
 }
 
 exports.mysql = require( "./mysql.js" );
+exports.mysql8 = require( "./mysql8.js" );
 
 exports.ds = require( "./ds.js" );
 
