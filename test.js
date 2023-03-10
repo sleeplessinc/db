@@ -1,24 +1,22 @@
+const sleepless = require( "sleepless" );
 
-require( "sleepless" );
-sleepless.globalize();
+const inspect = function( o, d ) { return require( "util" ).inspect( o, d ) }
+const dump = function( o, d ) { sleepless.log( inspect( o, d ) ); }
 
-inspect = function( o, d ) { return require( "util" ).inspect( o, d ) }
-dump = function( o, d ) { log( inspect( o, d ) ); }
-
-function okay( a ) {
-	log( "OKAY: " + inspect(a) );
+const testOkay = function( a ) {
+	sleepless.log( "OKAY: " + inspect(a) );
 }
-function fail( a ) {
+const testFail = function( a ) {
 	console.warn( "FAIL: " + inspect(a) );
 }
 
 stuff = "stuff";
 db = require( "./index.js" ).ds.connect( { filename: "foo.json" } );
 db.insert( stuff, { name: sha1(""+time()) }, new_id => {
-	db.select( stuff, {}, okay, fail );
-	db.remove( stuff, { name: /4f/ }, okay, fail );
-	db.select( stuff, {}, okay, fail );
-}, fail );
+	db.select( stuff, {}, testOkay, testFail );
+	db.remove( stuff, { name: /4f/ }, testOkay, testFail );
+	db.select( stuff, {}, testOkay, testFail );
+}, testFail );
 
 
 //
@@ -28,8 +26,14 @@ opts = {
 	secretAccessKey: process.env[ "AWS_SECRET_ACCESS_KEY" ],
 };
 dump( opts );
-db = require( "./index.js" ).dynamodb.connect( opts );
-db.tables( okay, fail );
+db = require( "./index.js" ).dynamodb?.connect( opts );
+if(!db ) {
+    testFail( "could not connect to dynamodb" );
+}
+else
+{
+    db.tables( testOkay, testFail );
+}
 
 
 
@@ -40,16 +44,38 @@ opts = {
 	"database": "database_name"
 }
 dump( opts );
-db = require( "./index.js" ).mysql.connect( opts );
-db.get_one( "select ?", [ 7 ], ( e, r ) => {
+db = require( "./index.js" ).mysql.connect( opts, testOkay, testFail );
+db?.get_one( "select ?", [ 7 ], ( e, r ) => {
 	if( e ) {
-		fail( e );
+		testFail( e );
 	} else {
-		okay( r );
+		testOkay( r );
 	}
 	db.end();
 });
 
+opts = {
+    name: "foobar.db"
+}
+dump( opts );
+db = require( "./index.js" ).sqlite3.connect( opts );
+console.log(db);
+if(!db) {
+    testFail( "could not connect to sqlite3" );
+}
+else
+{
+    db.query( "select ?", [ 7 ], ( result ) => {
+        if(!result)
+        {
+            testFail( "no result" );
+            db.end();
+            return;
+        }
 
+        testOkay( result );
+        db.end();
+    }, testFail);
+}
 
 

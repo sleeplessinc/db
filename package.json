@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.630.0",
+    "better-sqlite3": "^8.2.0",
     "ds": "^1.4.2",
     "freekey": "^1.1.0",
     "mysql": "^2.18.1",
