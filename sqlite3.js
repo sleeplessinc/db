@@ -20,19 +20,58 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE. 
 */
 
+const sqlite3 = require("better-sqlite3");
+const sleepless = require("sleepless");
+sleepless.globalize();
 
-exports.connect = function(type, cfg) {
-	let mod = require("./submodules/"+type);
-	return mod.connect(cfg);
-}
+function connect(opts, okay, fail)
+{
+    if(!okay)
+    {
+        okay = function() {}; 
+        fail = console.warn;
+    }
 
-exports.mysql = require( "./mysql.js" );
-exports.mysql8 = require( "./mysql8.js" );
-exports.sqlite3 = require( "./sqlite3.js" );
+    if(!opts?.name?.length)
+    {
+        fail("options must include a name property. For example: { name: 'foobar.db' }");
+        return;
+    }
 
-exports.ds = require( "./ds.js" );
+    let cnx = require("better-sqlite3")(opts.name, opts);
 
-//exports.dynamodb = require( "./dynamodb.js" );
+    if(!cnx)
+    {
+        fail("could not connect to database");
+        return;
+    }
+
+    let db = {};
+
+    db.end = function()
+    {
+        cnx.close();
+        cnx = null;
+    };
+
+    db.query = function(sql, args, okay, fail)
+    {
+        const row = cnx.prepare(sql).get(args);
+        if(!row)
+        {
+            fail("no rows found");
+            return db;
+        }
+        
+        okay(row);
+        return db;
+    };
+
+    okay(db);
+    return db;
+};
+
+module.exports = {connect};
 
 
 
