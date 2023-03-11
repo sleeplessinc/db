@@ -21,5 +21,9 @@
     "redis": "^3.0.2",
     "runq": "^1.1.2",
     "sleepless": "^3.8.0"
+  },
+  "devDependencies": {
+    "log5": "^2.4.0",
+    "test": "^3.3.0"
   }
 }
