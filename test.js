@@ -183,8 +183,9 @@ test("sqlite3 - drop table foo", SKIP_IF_NO_DB(sqlite3_db), function()
 test("sqlite3 - close connection", SKIP_IF_NO_DB(sqlite3_db), function()
 {
     sqlite3_db.end();
-    sqlite3_db.query( "select * from foo", [], ( result ) => {
-        assert(!result);
+    sqlite3_db.query( "select * from foo", [], null, function(error)
+    {
+        assert(error);
     });
 });
 
