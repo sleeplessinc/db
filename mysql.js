@@ -27,7 +27,7 @@ sleepless.globalize();
 function connect( opts, okay, fail ) {
 
 	let cnx = mysql.createConnection( opts ); 
-	return cnx.connect( err => {
+	cnx.connect( err => {
 
 		if( err ) {
 			fail( err );
@@ -139,9 +139,9 @@ function connect( opts, okay, fail ) {
 		*/
 
 		okay( db );
-        
-        return db;
+
 	});
+
 };
 
 module.exports = { connect };
