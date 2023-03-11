@@ -1,81 +1,188 @@
 const sleepless = require( "sleepless" );
+const L = require("log5").mkLog("\tdb_test: ")(5);
+
+const test = require("test");
+const assert = require("node:assert");
 
 const inspect = function( o, d ) { return require( "util" ).inspect( o, d ) }
-const dump = function( o, d ) { sleepless.log( inspect( o, d ) ); }
+
+const SKIP_IF_NO_DB = function(db)
+{
+    return {skip: !db};
+};
 
 const testOkay = function( a ) {
-	sleepless.log( "OKAY: " + inspect(a) );
-}
-const testFail = function( a ) {
-	console.warn( "FAIL: " + inspect(a) );
+	L.D( "OKAY: " + inspect(a) );
 }
 
-stuff = "stuff";
-db = require( "./index.js" ).ds.connect( { filename: "foo.json" } );
-db.insert( stuff, { name: sha1(""+time()) }, new_id => {
-	db.select( stuff, {}, testOkay, testFail );
-	db.remove( stuff, { name: /4f/ }, testOkay, testFail );
-	db.select( stuff, {}, testOkay, testFail );
-}, testFail );
+const stuff = "stuff";
+const ds_config = {filename: "foo.json"};
+const ds_db = require( "./index.js" ).ds.connect( ds_config );
 
+test("ds - connection valid", function() {
+    L.D( "ds_db: " + inspect( ds_db ) );
+    assert(ds_db?.insert);
+});
+
+test("ds - insert", SKIP_IF_NO_DB(ds_db), function()
+{
+    ds_db.insert(stuff, {name: sleepless.sha1("" + sleepless.time())}, new_id =>
+    {
+        assert(new_id);
+    });
+});
+
+test("ds - select", SKIP_IF_NO_DB(ds_db), function()
+{
+    ds_db.select(stuff, {}, function(result)
+    {
+        assert(result);
+    });
+});
+
+test("ds - remove", SKIP_IF_NO_DB(ds_db), function()
+{
+    ds_db.remove(stuff, {}, function(result)
+    {
+        assert(result);
+    });
+});
+
+test("ds - end", SKIP_IF_NO_DB(ds_db), function()
+{
+    // ds_db.end();
+    assert(true);
+});
 
 //
-opts = {
+const dynamo_opts = {
 	region: "us-west-2",
 	accessKeyId: process.env[ "AWS_ACCESS_KEY_ID" ],
 	secretAccessKey: process.env[ "AWS_SECRET_ACCESS_KEY" ],
 };
-dump( opts );
-db = require( "./index.js" ).dynamodb?.connect( opts );
-if(!db ) {
-    testFail( "could not connect to dynamodb" );
+if( !dynamo_opts.accessKeyId === undefined ) {
+    const dynamo_db = require( "./index.js" ).dynamodb?.connect( dynamo_opts );
+
+    test("dynamodb - connection valid", function()
+    {
+        L.D( "dynamo_db: " + inspect( dynamo_db ) );
+        assert(dynamo_db?.query);
+    });
+
+    test("dynamodb - get tables", SKIP_IF_NO_DB(dynamo_db), function()
+    {
+        dynamo_db.tables( testOkay );
+        dynamo_db.end();
+        assert(!dynamo_db.db);
+    });
 }
 else
 {
-    db.tables( testOkay, testFail );
+    L.D( "dynamodb - no connection");
+}
+
+const mysql_opts = {
+	"host": process.env["MYSQL_HOST"],
+	"user": process.env["MYSQL_USER"],
+	"password": process.env["MYSQL_PASSWORD"], 
+	"database": process.env["MYSQL_DATABASE"],
+}
+if( mysql_opts.host !== undefined)
+{
+    const mysql_db = require( "./index.js" ).mysql.connect( mysql_opts);
+    test("mysql - connection valid", function()
+    {
+        L.D( "mysql_db: " + inspect( mysql_db ) );
+        assert(mysql_db?.query);
+    });
+
+    test("mysql - get one", SKIP_IF_NO_DB(mysql_db), function()
+    {
+        mysql_db?.get_one( "select ?", [ 7 ], ( e, r ) => {
+            assert(r);
+        });
+    });
+
+    test("mysql - end", SKIP_IF_NO_DB(mysql_db), function()
+    {
+        mysql_db.end();
+        assert(!mysql_db?.query);
+    });
+}
+else
+{
+    L.D( "mysql - no connection" );
 }
 
 
+const sqlite3_opts = {name: "foobar.db"}
+const sqlite3_db = require( "./index.js" ).sqlite3.connect( sqlite3_opts );
 
-opts = {
-	"host": "localhost",
-	"user": "bustle",
-	"password": "password", 
-	"database": "database_name"
-}
-dump( opts );
-db = require( "./index.js" ).mysql.connect( opts, testOkay, testFail );
-db?.get_one( "select ?", [ 7 ], ( e, r ) => {
-	if( e ) {
-		testFail( e );
-	} else {
-		testOkay( r );
-	}
-	db.end();
+const sqlite3_time_val = new Date().getTime();
+const sqlite3_time_val_updated = sqlite3_time_val + 1000;
+
+test("sqlite3 - connection valid", function()
+{
+    L.D( "sqlite3_opts: " + inspect( sqlite3_opts ) );
+    assert(sqlite3_db?.query);
 });
 
-opts = {
-    name: "foobar.db"
-}
-dump( opts );
-db = require( "./index.js" ).sqlite3.connect( opts );
-console.log(db);
-if(!db) {
-    testFail( "could not connect to sqlite3" );
-}
-else
+test("sqlite3 - create table foo", SKIP_IF_NO_DB(sqlite3_db), function()
 {
-    db.query( "select ?", [ 7 ], ( result ) => {
-        if(!result)
-        {
-            testFail( "no result" );
-            db.end();
-            return;
-        }
+    sqlite3_db.query( "create table if not exists foo (bar integer)", [], ( result ) => {
+        assert(result);
+    });
+});
 
-        testOkay( result );
-        db.end();
-    }, testFail);
-}
+test("sqlite3 - insert into foo", SKIP_IF_NO_DB(sqlite3_db), function()
+{
+    sqlite3_db.insert( "insert into foo (bar) values (?)", [ sqlite3_time_val ], ( result ) => {
+        assert(result);
+    });
+});
+
+test("sqlite3 - select from foo", SKIP_IF_NO_DB(sqlite3_db), function()
+{
+    sqlite3_db.get_one( "select * from foo", [], ( result ) => {
+        assert(result);
+    });
+});
+
+test("sqlite3 - select ALL from foo", SKIP_IF_NO_DB(sqlite3_db), function()
+{
+    sqlite3_db.get_recs( "select * from foo", [], ( result ) => {
+        assert(result?.length > 0);
+    });
+})
+
+
+test("sqlite3 - update foo", SKIP_IF_NO_DB(sqlite3_db), function()
+{
+    sqlite3_db.update( "update foo set bar=? where bar=?", [ sqlite3_time_val_updated, sqlite3_time_val ], ( result ) => {
+        assert(result === 1);
+    });
+});
+
+test("sqlite3 - delete from foo", SKIP_IF_NO_DB(sqlite3_db), function()
+{
+    sqlite3_db.delete( "delete from foo where bar = ?", [ sqlite3_time_val_updated ], ( result ) => {
+        assert(result === 1);
+    });
+});
+
+test("sqlite3 - drop table foo", SKIP_IF_NO_DB(sqlite3_db), function()
+{
+    sqlite3_db.query( "drop table foo", [], ( result ) => {
+        assert(result);
+    });
+});
+
+test("sqlite3 - close connection", SKIP_IF_NO_DB(sqlite3_db), function()
+{
+    sqlite3_db.end();
+    sqlite3_db.query( "select * from foo", [], ( result ) => {
+        assert(!result);
+    });
+});
 
 
