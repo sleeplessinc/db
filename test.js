@@ -116,7 +116,10 @@ else
 
 
 const sqlite3_opts = {name: "foobar.db"}
-const sqlite3_db = require( "./index.js" ).sqlite3.connect( sqlite3_opts );
+const sqlite3_db = require( "./index.js" ).sqlite3.connect( sqlite3_opts, function(result)
+{
+    L.D( "sqlite3_db: " + inspect( result ) );
+});
 
 const sqlite3_time_val = new Date().getTime();
 const sqlite3_time_val_updated = sqlite3_time_val + 1000;
