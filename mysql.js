@@ -123,7 +123,7 @@ function connect( opts, okay, fail ) {
 			}, fail );
 		}
 
-		// XXX This shit doesn't seem to work.
+		// XXX This shit doesn't seem to work - it would be nice if it did
 		/*
 		db.start = function( okay, fail ) {
 			return db.query( "start transaction", [], okay, fail );
