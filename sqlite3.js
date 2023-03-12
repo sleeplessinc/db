@@ -13,24 +13,19 @@ all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE. 
 */
 
-const sqlite3 = require("better-sqlite3");
-const sleepless = require("sleepless");
-sleepless.globalize();
+const L = require("log5").mkLog("\tdb_sqlite3: ")(5);
 
 function connect(opts, okay, fail)
 {
-    if(!okay)
-    {
-        okay = function() {}; 
-        fail = console.warn;
-    }
+    okay = okay || L.D; 
+    fail = fail || L.E; 
 
     if(!opts?.name?.length)
     {
@@ -38,9 +33,9 @@ function connect(opts, okay, fail)
         return;
     }
 
-    let cnx = require("better-sqlite3")(opts.name, opts);
+    let connection = require("better-sqlite3")(opts.name, opts);
 
-    if(!cnx)
+    if(!connection)
     {
         fail("could not connect to database");
         return;
@@ -50,26 +45,104 @@ function connect(opts, okay, fail)
 
     db.end = function()
     {
-        cnx.close();
-        cnx = null;
+        connection.close();
+        connection = null;
     };
 
-    db.query = function(sql, args, okay, fail)
+    db.query = function(sql, args, _okay, _fail)
     {
-        const row = cnx.prepare(sql).get(args);
-        if(!row)
+        _okay = _okay || okay;
+        _fail = _fail || fail; 
+        
+        if(!connection)
         {
-            fail("no rows found");
+            _fail("connection is closed");
+            return null;
+        }
+        
+        const result = connection?.prepare(sql).run(args);
+        if(!result)
+        {
+            _fail("no rows found");
             return db;
         }
         
-        okay(row);
+        _okay(result);
         return db;
     };
 
+    db.get_recs = function( sql, args, _okay, _fail ) {
+        
+        _okay = _okay || okay; 
+        _fail = _fail || fail; 
+        
+        if(!connection)
+        {
+            _fail("connection is closed");
+            return null;
+        }
+
+        const rows = connection?.prepare(sql).all(args);
+        if(!rows)
+        {
+            _fail("no rows found");
+            return db;
+        }
+        
+        _okay(rows);
+        return db;
+    }
+
+    db.get_one_rec = function( sql, args, _okay, _fail ) {
+        _okay = _okay || okay;
+        _fail = _fail || fail;
+        
+        if(!connection)
+        {
+            _fail("connection is closed");
+            return null;
+        }
+
+        const rows = connection?.prepare(sql).get(args);
+        if(!rows)
+        {
+            _fail("no rows found");
+            return db;
+        }
+
+        _okay(rows);
+        return db;
+    }
+    
+    db.get_one = db.get_one_rec;
+
+    db.update = function(sql, args, _okay, _fail) {
+        _okay = _okay || okay;
+        _fail = _fail || fail;
+        return db.query( sql, args, res => {
+            _okay( res["changes"] );
+        }, _fail);
+    }
+
+    db.insert = function(sql, args, _okay, _fail) {
+        _okay = _okay || okay;
+        _fail = _fail || fail;
+        return db.query( sql, args, res => {
+            _okay( res["lastInsertRowid"] );
+        }, _fail );
+    }
+
+    db.delete = function( sql, args, _okay, _fail ) {
+        _okay = _okay || okay;
+        _fail = _fail || fail;
+        return db.query( sql, args, res => {
+            _okay( res["changes"] );
+        }, _fail );
+    }
+    
     okay(db);
     return db;
-};
+}
 
 module.exports = {connect};
 
