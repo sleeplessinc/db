@@ -53,7 +53,7 @@ function connect(opts, okay, fail)
 
     db.end = function()
     {
-        connection.close();
+        connection?.close();
         connection = null;
     };
 
