@@ -27,12 +27,12 @@ function connect(opts, okay, fail)
     okay = okay || function(data)
     {
         L.D(sleepless.o2j(data));
-        return db;
+        return data;
     }
     fail = fail || function(err)
     {
         L.E(sleepless.o2j(err));
-        return db;
+        return err;
     }
 
     if(!opts?.name?.length)
@@ -60,30 +60,30 @@ function connect(opts, okay, fail)
     db.query = function(sql, args, _okay, _fail)
     {
         _okay = _okay || okay;
-        _fail = _fail || fail; 
-        
+        _fail = _fail || fail;
+
         if(!connection)
         {
             _fail("connection is closed");
             return null;
         }
-        
+
         const result = connection?.prepare(sql).run(args);
         if(!result)
         {
             _fail("no rows found");
-            return db;
+            return null;
         }
-        
+
         _okay(result);
-        return db;
+        return result;
     };
 
     db.get_recs = function( sql, args, _okay, _fail ) {
-        
-        _okay = _okay || okay; 
-        _fail = _fail || fail; 
-        
+
+        _okay = _okay || okay;
+        _fail = _fail || fail;
+
         if(!connection)
         {
             _fail("connection is closed");
@@ -94,17 +94,17 @@ function connect(opts, okay, fail)
         if(!rows)
         {
             _fail("no rows found");
-            return db;
+            return null;
         }
-        
+
         _okay(rows);
-        return db;
+        return rows;
     }
 
     db.get_one_rec = function( sql, args, _okay, _fail ) {
         _okay = _okay || okay;
         _fail = _fail || fail;
-        
+
         if(!connection)
         {
             _fail("connection is closed");
@@ -114,14 +114,14 @@ function connect(opts, okay, fail)
         const rows = connection?.prepare(sql).get(args);
         if(!rows)
         {
-            _fail("no rows found");
-            return db;
+            _fail("sqlite3.get_one_rec: no row found");
+            return null;
         }
 
         _okay(rows);
-        return db;
+        return rows;
     }
-    
+
     db.get_one = db.get_one_rec;
 
     db.update = function(sql, args, _okay, _fail) {
@@ -147,7 +147,7 @@ function connect(opts, okay, fail)
             _okay( res["changes"] );
         }, _fail );
     }
-    
+
     okay(db);
     return db;
 }
