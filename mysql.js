@@ -55,7 +55,7 @@ function connect( opts, okay, fail ) {
 					}
 				}
 			});
-			return db;
+			//return db;
 		};
 
 		db.get_recs = function( sql, args, okay, fail ) {
