@@ -24,8 +24,16 @@ const L = require("log5").mkLog("\tdb_sqlite3: ")(5);
 
 function connect(opts, okay, fail)
 {
-    okay = okay || L.D; 
-    fail = fail || L.E; 
+    okay = okay || function(data)
+    {
+        L.D(sleepless.o2j(data));
+        return db;
+    }
+    fail = fail || function(err)
+    {
+        L.E(sleepless.o2j(err));
+        return db;
+    }
 
     if(!opts?.name?.length)
     {
