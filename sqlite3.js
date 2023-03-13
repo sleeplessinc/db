@@ -20,10 +20,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE. 
 */
 
-const L = require("log5").mkLog("\tdb_sqlite3: ")(5);
 
 function connect(opts, okay, fail)
 {
+    const L = require("log5").mkLog("\tdb_sqlite3: ")(opts?.logLevel || 3);
+    
     okay = okay || function(data)
     {
         L.D(sleepless.o2j(data));
@@ -35,9 +36,9 @@ function connect(opts, okay, fail)
         return err;
     }
 
-    if(!opts?.name?.length)
+    if(!opts?.databaseName?.length)
     {
-        fail("options must include a name property. For example: { name: 'foobar.db' }");
+        fail("options must include a databaseName property. For example: { databaseName: 'foobar.db' }");
         return;
     }
 
@@ -48,7 +49,9 @@ function connect(opts, okay, fail)
         fail("could not connect to database");
         return;
     }
-
+    
+    connection.pragma('journal_mode = WAL');
+    
     let db = {};
 
     db.end = function()
@@ -61,6 +64,10 @@ function connect(opts, okay, fail)
     {
         _okay = _okay || okay;
         _fail = _fail || fail;
+        
+        L.D(`--- QUERY ---
+        sql: ${sleepless.o2j(sql)}
+        args: ${sleepless.o2j(args)}`);
 
         if(!connection)
         {
@@ -84,6 +91,8 @@ function connect(opts, okay, fail)
         _okay = _okay || okay;
         _fail = _fail || fail;
 
+        L.V("GET_RECS");
+        
         if(!connection)
         {
             _fail("connection is closed");
@@ -104,6 +113,8 @@ function connect(opts, okay, fail)
     db.get_one_rec = function( sql, args, _okay, _fail ) {
         _okay = _okay || okay;
         _fail = _fail || fail;
+
+        L.V("GET_ONE");
 
         if(!connection)
         {
@@ -127,6 +138,7 @@ function connect(opts, okay, fail)
     db.update = function(sql, args, _okay, _fail) {
         _okay = _okay || okay;
         _fail = _fail || fail;
+        L.V("UPDATE");
         return db.query( sql, args, res => {
             _okay( res["changes"] );
         }, _fail);
@@ -135,6 +147,7 @@ function connect(opts, okay, fail)
     db.insert = function(sql, args, _okay, _fail) {
         _okay = _okay || okay;
         _fail = _fail || fail;
+        L.V("INSERT");
         return db.query( sql, args, res => {
             _okay( res["lastInsertRowid"] );
         }, _fail );
@@ -143,6 +156,7 @@ function connect(opts, okay, fail)
     db.delete = function( sql, args, _okay, _fail ) {
         _okay = _okay || okay;
         _fail = _fail || fail;
+        L.V("DELETE");
         return db.query( sql, args, res => {
             _okay( res["changes"] );
         }, _fail );
