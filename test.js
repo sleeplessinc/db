@@ -115,11 +115,8 @@ else
 }
 
 
-const sqlite3_opts = {name: "foobar.db"}
-const sqlite3_db = require( "./index.js" ).sqlite3.connect( sqlite3_opts, function(result)
-{
-    L.D( "sqlite3_db: " + inspect( result ) );
-});
+const sqlite3_opts = {databaseName: "foobar.db", logLevel: 3}
+const sqlite3_db = require( "./index.js" ).sqlite3.connect( sqlite3_opts );
 
 const sqlite3_time_val = new Date().getTime();
 const sqlite3_time_val_updated = sqlite3_time_val + 1000;
@@ -132,61 +129,53 @@ test("sqlite3 - connection valid", function()
 
 test("sqlite3 - create table foo", SKIP_IF_NO_DB(sqlite3_db), function()
 {
-    sqlite3_db.query( "create table if not exists foo (bar integer)", [], ( result ) => {
-        assert(result);
-    });
+    const result = sqlite3_db.query( "create table if not exists foo (bar integer)", []);
+    assert(result?.changes === 1 || result?.changes === 0);
 });
 
 test("sqlite3 - insert into foo", SKIP_IF_NO_DB(sqlite3_db), function()
 {
-    sqlite3_db.insert( "insert into foo (bar) values (?)", [ sqlite3_time_val ], ( result ) => {
-        assert(result);
-    });
+    const result = sqlite3_db.insert( "insert into foo (bar) values (?)", [ sqlite3_time_val ]);
+    assert(result?.changes === 1);
 });
 
-test("sqlite3 - select from foo", SKIP_IF_NO_DB(sqlite3_db), function()
+test("sqlite3 - select ONE from foo", SKIP_IF_NO_DB(sqlite3_db), function()
 {
-    sqlite3_db.get_one( "select * from foo", [], ( result ) => {
-        assert(result);
-    });
+    const result = sqlite3_db.get_one( "select * from foo", []);
+    assert(result?.bar);
 });
 
 test("sqlite3 - select ALL from foo", SKIP_IF_NO_DB(sqlite3_db), function()
 {
-    sqlite3_db.get_recs( "select * from foo", [], ( result ) => {
-        assert(result?.length > 0);
-    });
-})
-
+    const result = sqlite3_db.get_recs( "select * from foo", []);
+    assert(result?.length > 0);
+});
 
 test("sqlite3 - update foo", SKIP_IF_NO_DB(sqlite3_db), function()
 {
-    sqlite3_db.update( "update foo set bar=? where bar=?", [ sqlite3_time_val_updated, sqlite3_time_val ], ( result ) => {
-        assert(result === 1);
-    });
+    const result = sqlite3_db.update( "update foo set bar=? where bar=?", [ sqlite3_time_val_updated, sqlite3_time_val ]);
+    assert(result?.changes === 1);
 });
 
 test("sqlite3 - delete from foo", SKIP_IF_NO_DB(sqlite3_db), function()
 {
-    sqlite3_db.delete( "delete from foo where bar = ?", [ sqlite3_time_val_updated ], ( result ) => {
-        assert(result === 1);
-    });
+    const result = sqlite3_db.delete( "delete from foo where bar = ?", [ sqlite3_time_val_updated ]);
+    assert(result?.changes === 1);
 });
 
 test("sqlite3 - drop table foo", SKIP_IF_NO_DB(sqlite3_db), function()
 {
-    sqlite3_db.query( "drop table foo", [], ( result ) => {
-        assert(result);
-    });
+    const result = sqlite3_db.query("DROP TABLE `foo`", []);
+    assert(result?.lastInsertRowid === 1);
 });
 
 test("sqlite3 - close connection", SKIP_IF_NO_DB(sqlite3_db), function()
 {
     sqlite3_db.end();
-    sqlite3_db.query( "select * from foo", [], null, function(error)
-    {
-        assert(error);
-    });
+    
+    // testing for a fail here is a success
+    const result = sqlite3_db.query( "select * from foo", []);
+    assert(!result);
 });
 
 
