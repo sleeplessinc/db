@@ -42,7 +42,7 @@ function connect(opts, okay, fail)
         return;
     }
 
-    let connection = require("better-sqlite3")(opts.name, opts);
+    let connection = require("better-sqlite3")(opts.databaseName || opts.name || "sqlite3_database.db", opts);
 
     if(!connection)
     {
