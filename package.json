@@ -1,7 +1,7 @@
 {
   "name": "db",
-  "version": "3.9.0",
-  "description": "Easy access to dynamo, ds, mongodb, redis, freekey",
+  "version": "3.9.1",
+  "description": "Some code for accessing databases",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {
     "type": "MIT",
