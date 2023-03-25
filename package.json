@@ -13,14 +13,14 @@
   },
   "dependencies": {
     "aws-sdk": "^2.630.0",
-    "better-sqlite3": "^8.2.0",
     "ds": "^1.4.2",
     "freekey": "^1.1.0",
     "mysql": "^2.18.1",
     "mysql8": "^2.17.3",
     "redis": "^3.0.2",
     "runq": "^1.1.2",
-    "sleepless": "^3.8.0"
+    "sleepless": "^3.8.0",
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "log5": "^2.4.0",
