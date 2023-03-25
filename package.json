@@ -12,12 +12,9 @@
     "url": "https://sleeplessinc@github.com/sleeplessinc/db.git"
   },
   "dependencies": {
-    "aws-sdk": "^2.630.0",
     "ds": "^1.4.2",
-    "freekey": "^1.1.0",
     "mysql": "^2.18.1",
     "mysql8": "^2.17.3",
-    "redis": "^3.0.2",
     "runq": "^1.1.2",
     "sleepless": "^3.8.0",
     "sqlite3": "^5.1.6"
