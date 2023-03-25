@@ -20,153 +20,127 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE. 
 */
 
+const L = require("log5").mkLog("\tdb_sqlite3: ")(3);
 
-function connect(opts, okay, fail)
+const _okay = function( data ) {};
+const _fail = function( err ) {};
+
+
+function connect(opts, okay = _okay, fail = _fail )
 {
-    const L = require("log5").mkLog("\tdb_sqlite3: ")(opts?.logLevel || 3);
+    if( typeof opts.logLevel === "number" ) {
+        L( opts.logLevel );
+    }
     
-    okay = okay || function(data)
+    if(!opts.databaseName)
     {
-        L.D(sleepless.o2j(data));
-        return data;
-    }
-    fail = fail || function(err)
-    {
-        L.E(sleepless.o2j(err));
-        return err;
-    }
-
-    if(!opts?.databaseName?.length)
-    {
-        fail("options must include a databaseName property. For example: { databaseName: 'foobar.db' }");
+        fail("Options must include a databaseName property. For example: { databaseName: 'foobar.db' }");
         return;
     }
 
-    let connection = require("sqlite3")(opts.databaseName || opts.name || "sqlite3_database.db", opts);
+    const sqlite3 = require("sqlite3")
 
-    if(!connection)
-    {
-        fail("could not connect to database");
-        return;
-    }
-    
-    connection.pragma('journal_mode = WAL');
-    
+    if( opts.logLevel >= 4 ) 
+        sqlite3.verbose();
+
     let db = {};
 
     db.end = function()
     {
-        connection?.close();
-        connection = null;
+        connection.close();
     };
 
-    db.query = function(sql, args, _okay, _fail)
+    db.query = function(sql, args, okay = _okay, fail = _fail )
     {
-        _okay = _okay || okay;
-        _fail = _fail || fail;
-        
-        L.D(`--- QUERY ---
-        sql: ${sleepless.o2j(sql)}
-        args: ${sleepless.o2j(args)}`);
-
-        if(!connection)
-        {
-            _fail("connection is closed");
-            return null;
-        }
-
-        const result = connection?.prepare(sql).run(args);
-        if(!result)
-        {
-            _fail("no rows found");
-            return null;
-        }
-
-        _okay(result);
-        return result;
+        L.D("query: "+o2j(sql)+" "+o2j(args));
+        connection.run(sql, args, function( err ) {
+            if( err ) {
+                fail( err );
+            } else {
+                okay( null );
+            }
+        } );
     };
 
-    db.get_recs = function( sql, args, _okay, _fail ) {
+    db.get_recs = function(sql, args, okay = _okay, fail = _fail )
+    {
+        L.D("get_recs: "+o2j(sql)+" "+o2j(args));
+        connection.all(sql, args, function( err, rows ) {
+            if( err ) {
+                fail( err );
+            } else {
+                okay( rows );
+            }
+        } );
+        return db;
+    };
 
-        _okay = _okay || okay;
-        _fail = _fail || fail;
-
-        L.V("GET_RECS");
-        
-        if(!connection)
-        {
-            _fail("connection is closed");
-            return null;
-        }
-
-        const rows = connection?.prepare(sql).all(args);
-        if(!rows)
-        {
-            _fail("no rows found");
-            return null;
-        }
-
-        _okay(rows);
-        return rows;
-    }
-
-    db.get_one_rec = function( sql, args, _okay, _fail ) {
-        _okay = _okay || okay;
-        _fail = _fail || fail;
-
-        L.V("GET_ONE");
-
-        if(!connection)
-        {
-            _fail("connection is closed");
-            return null;
-        }
-
-        const rows = connection?.prepare(sql).get(args);
-        if(!rows)
-        {
-            _fail("sqlite3.get_one_rec: no row found");
-            return null;
-        }
-
-        _okay(rows);
-        return rows;
-    }
+    db.get_one_rec = function(sql, args, okay = _okay, fail = _fail )
+    {
+        L.D("get_one_rec: "+o2j(sql)+" "+o2j(args));
+        connection.get( sql, args, function( err, rec ) {
+            if( err ) {
+                fail( err );
+            } else {
+                okay( rows );
+            }
+        } );
+        return db;
+    };
 
     db.get_one = db.get_one_rec;
 
-    db.update = function(sql, args, _okay, _fail) {
-        _okay = _okay || okay;
-        _fail = _fail || fail;
-        L.V("UPDATE");
-        return db.query( sql, args, res => {
-            _okay( res["changes"] );
-        }, _fail);
-    }
+    db.update = function(sql, args, okay = _okay, fail = _fail )
+    {
+        L.D("update: "+o2j(sql)+" "+o2j(args));
+        connection.run( sql, args, function( err ) {
+            if( err ) {
+                fail( err );
+            } else {
+                okay( this.changes );
+            }
+        } );
+        return db;
+    };
 
-    db.insert = function(sql, args, _okay, _fail) {
-        _okay = _okay || okay;
-        _fail = _fail || fail;
-        L.V("INSERT");
-        return db.query( sql, args, res => {
-            _okay( res["lastInsertRowid"] );
-        }, _fail );
-    }
+    db.insert = function(sql, args, okay = _okay, fail = _fail )
+    {
+        L.D("insert: "+o2j(sql)+" "+o2j(args));
+        connection.run( sql, args, function( err ) {
+            if( err ) {
+                fail( err );
+            } else {
+                okay( this.lastID );
+            }
+        } );
+        return db;
+    };
 
-    db.delete = function( sql, args, _okay, _fail ) {
-        _okay = _okay || okay;
-        _fail = _fail || fail;
-        L.V("DELETE");
-        return db.query( sql, args, res => {
-            _okay( res["changes"] );
-        }, _fail );
-    }
+    db.delete = function(sql, args, okay = _okay, fail = _fail )
+    {
+        L.D("delete: "+o2j(sql)+" "+o2j(args));
+        connection.run( sql, args, function( err ) {
+            if( err ) {
+                fail( err );
+            } else {
+                okay( this.changes );
+            }
+        } );
+        return db;
+    };
 
-    okay(db);
+    let connection = new sqlite3.Database( opts.databaseName, function( err )
+    {
+        if( err ) {
+            fail( err );
+        } else {
+            okay( db );
+        }
+    } );
+
     return db;
 }
 
 module.exports = {connect};
-
 
 
