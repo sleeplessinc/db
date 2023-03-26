@@ -115,7 +115,7 @@ else
 }
 
 
-const sqlite3_opts = {databaseName: "foobar.db", logLevel: 3}
+const sqlite3_opts = {databaseName: "foobar.db", logLevel: 4}
 const sqlite3_db = require( "./index.js" ).sqlite3.connect( sqlite3_opts );
 
 const sqlite3_time_val = new Date().getTime();
