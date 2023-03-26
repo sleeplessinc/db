@@ -45,9 +45,15 @@ function connect(opts, okay = _okay, fail = _fail )
 
     let db = {};
 
-    db.end = function()
+    db.end = function( okay = _okay, fail = _fail )
     {
-        connection.close();
+        connection.close( function( err ) {
+            if( err ) {
+                fail( err );
+            } else {
+                okay();
+            }
+        } );
     };
 
     db.query = function(sql, args, okay = _okay, fail = _fail )
