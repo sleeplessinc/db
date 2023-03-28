@@ -71,11 +71,11 @@ function connect(opts, okay = _okay, fail = _fail )
     db.get_recs = function(sql, args, okay = _okay, fail = _fail )
     {
         L.D("get_recs: "+o2j(sql)+" "+o2j(args));
-        connection.all(sql, args, function( err, rows ) {
+        connection.all(sql, args, function( err, recs ) {
             if( err ) {
                 fail( err );
             } else {
-                okay( rows );
+                okay( recs );
             }
         } );
         return db;
@@ -88,7 +88,7 @@ function connect(opts, okay = _okay, fail = _fail )
             if( err ) {
                 fail( err );
             } else {
-                okay( rows );
+                okay( rec );
             }
         } );
         return db;
