@@ -1,6 +1,6 @@
 {
   "name": "db",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Some code for accessing databases",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {
@@ -17,6 +17,7 @@
     "mysql8": "^2.17.3",
     "runq": "^1.1.2",
     "sleepless": "^3.8.0",
+    "log5": "^2.4.0",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
