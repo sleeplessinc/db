@@ -21,8 +21,8 @@ IN THE SOFTWARE.
 */
 
 const mysql = require( "mysql8" );
-const sleepless = require( "sleepless" );
-sleepless.globalize();
+
+const { o2j, } = require( "sleepless" );
 
 function connect( opts, okay, fail ) {
 

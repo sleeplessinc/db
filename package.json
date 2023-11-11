@@ -1,6 +1,6 @@
 {
   "name": "db",
-  "version": "4.0.2",
+  "version": "5.0.0",
   "description": "Some code for accessing databases",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {

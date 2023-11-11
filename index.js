@@ -21,20 +21,16 @@ IN THE SOFTWARE.
 */
 
 
+/*
 exports.connect = function(type, cfg) {
 	let mod = require("./submodules/"+type);
 	return mod.connect(cfg);
 }
+*/
 
-// exports.dynamodb = require( "./dynamodb.js" );
-exports.dynamodb = null;
 exports.mysql = require( "./mysql.js" );
 exports.mysql8 = require( "./mysql8.js" );
-exports.sqlite3 = require( "./sqlite3.js" );
 
-exports.ds = require( "./ds.js" );
-
-//exports.dynamodb = require( "./dynamodb.js" );
 
 
 
