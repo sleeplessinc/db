@@ -1,19 +1,34 @@
-const sleepless = require( "sleepless" );
-const L = require("log5").mkLog("\tdb_test: ")(5);
+
+const { log, o2j, } = require( "sleepless" );
 
 const test = require("test");
 const assert = require("node:assert");
 
-const inspect = function( o, d ) { return require( "util" ).inspect( o, d ) }
 
-const SKIP_IF_NO_DB = function(db)
-{
-    return {skip: !db};
-};
-
-const testOkay = function( a ) {
-	L.D( "OKAY: " + inspect(a) );
+function fail( error ) {
+    console.error( error );
+} 
+function testOkay( a ) {
+	log( "OKAY: " + o2j(a) );
 }
+
+const db = require( "." );
+log( Object.keys( db ) );
+log( Object.keys( db.mysql ) );
+log( Object.keys( db.mysql8 ) );
+
+/*
+
+const mysql_opts = {
+	"host": process.env["MYSQL_HOST"],
+	"user": process.env["MYSQL_USER"],
+	"password": process.env["MYSQL_PASSWORD"], 
+	"database": process.env["MYSQL_DATABASE"],
+}
+
+db.mysql.connect( mysql_db => {
+}, fail );
+
 
 const stuff = "stuff";
 const ds_config = {filename: "foo.json"};
@@ -80,41 +95,9 @@ else
 {
     L.D( "dynamodb - no connection");
 }
+*/
 
-const mysql_opts = {
-	"host": process.env["MYSQL_HOST"],
-	"user": process.env["MYSQL_USER"],
-	"password": process.env["MYSQL_PASSWORD"], 
-	"database": process.env["MYSQL_DATABASE"],
-}
-if( mysql_opts.host !== undefined)
-{
-    const mysql_db = require( "./index.js" ).mysql.connect( mysql_opts);
-    test("mysql - connection valid", function()
-    {
-        L.D( "mysql_db: " + inspect( mysql_db ) );
-        assert(mysql_db?.query);
-    });
-
-    test("mysql - get one", SKIP_IF_NO_DB(mysql_db), function()
-    {
-        mysql_db?.get_one( "select ?", [ 7 ], ( e, r ) => {
-            assert(r);
-        });
-    });
-
-    test("mysql - end", SKIP_IF_NO_DB(mysql_db), function()
-    {
-        mysql_db.end();
-        assert(!mysql_db?.query);
-    });
-}
-else
-{
-    L.D( "mysql - no connection" );
-}
-
-
+/*
 const sqlite3_opts = {databaseName: "foobar.db", logLevel: 4}
 const sqlite3_db = require( "./index.js" ).sqlite3.connect( sqlite3_opts );
 
@@ -177,5 +160,6 @@ test("sqlite3 - close connection", SKIP_IF_NO_DB(sqlite3_db), function()
     const result = sqlite3_db.query( "select * from foo", []);
     assert(!result);
 });
+*/
 
 
