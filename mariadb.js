@@ -49,15 +49,9 @@ async function connect( opts, done, fail ) {
         function query( sql, args, done, fail ) {
             cnx.query( sql, args, ( err, res ) => {
                 if( err ) {
-                    if( fail ) {
-                        fail( err );
-                    } else {
-                        throw err;
-                    }
+                    fail( err );
                 } else {
-                    if( done ) {
-                        done( res );
-                    }
+                    done( res );
                 }
             });
             return db;
@@ -89,9 +83,9 @@ async function connect( opts, done, fail ) {
             cnx.beginTransaction( err => {
                 if( err ) {
                     fail( err );
-                    return;
+                } else {
+                    done( db );
                 }
-                done( db );
             } );
             return db;
         }
@@ -100,14 +94,23 @@ async function connect( opts, done, fail ) {
             cnx.commit( err => {
                 if( err ) {
                     fail( err );
-                    return;
+                } else {
+                    done( db );
                 }
-                done( db );
             } );
             return db;
         }
 
-        // XXX rollback ?
+        function rollback( done, fail ) {
+            cnx.rollback( err => {
+                if( err ) {
+                    fail( err );
+                } else {
+                    done( db );
+                }
+            } );
+            return db;
+        }
 
 
         db = {
@@ -122,6 +125,7 @@ async function connect( opts, done, fail ) {
             delete: delete_fn,
             transaction,
             commit,
+            rollback,
         };
 
         done( db );

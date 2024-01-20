@@ -1,8 +1,10 @@
 
-const { log, o2j, } = require( "sleepless" );
+const { o2j, } = require( "sleepless" );
 
 //const test = require("test");
 const assert = require("node:assert");
+
+log = console.log;
 
 
 function fail( error ) {
@@ -14,42 +16,80 @@ function testOkay( a ) {
 
 require( "." ).mariadb.connect( process.env, db => {
 
-    function ins( val, done ) {
-        log( "insert: "+val );
-        db.insert( "insert into audit ( content ) values ( ? )", [ val ], done, fail );
-    }
-    function sel( id, done ) {
-        log( "select: "+id );
-        db.select( "select * from audit where id = ?", [ id ], done, fail );
-    }
-    function upd( val, id, done ) {
-        log( "update: "+id+", "+val );
-        db.select( "update audit set content = ? where id = ?", [ val, id ], done, fail );
-    }
-    function del( id, done ) {
-        log( "delete: "+id );
-        db.delete( "delete from audit where id = ? limit 1", [ id ], done, fail );
+    function all_done() {
+        log( "All done" );
+        db.release();
     }
 
-    ins( '"foo"', id => {
-        log( id );
-        sel( id, rec => {
-            log( rec );
-            upd( '"bar"', id, aff => {
-                log( aff );
-                sel( id, rec => {
-                    log( rec );
-                    del( id, aff => {
-                        log( aff );
-                        sel( id, rec => {
-                            log( rec );
-                            db.release();
-                        } );
+    function crud( data, done ) {
+        function l( s ) { log( data + ": ", s ) };
+
+        function ins( val, done ) {
+            l( "insert: "+val );
+            db.insert( "insert into audit ( content ) values ( ? )", [ val ], done, fail );
+        }
+        function sel( id, done ) {
+            l( "select: "+id );
+            db.select( "select * from audit where id = ?", [ id ], done, fail );
+        }
+        function upd( val, id, done ) {
+            l( "update: "+id+", "+val );
+            db.update( "update audit set category = ? where id = ?", [ val, id ], done, fail );
+        }
+        function del( id, done ) {
+            l( "delete: "+id );
+            db.delete( "delete from audit where id = ? limit 1", [ id ], done, fail );
+        }
+
+        ins( data, id => {
+            l( id );
+            sel( id, rec => {
+                l( rec );
+                upd( data, id, aff => {
+                    l( aff );
+                    sel( id, rec => {
+                        l( rec );
+                        //del( id, aff => {
+                        //    l( aff );
+                        //    sel( id, rec => {
+                        //        l( rec );
+                                l( "finished" );
+                                done();
+                        //    } );
+                        //} );
                     } );
                 } );
             } );
         } );
-    } );
+    }
+
+    function trx_roll() {
+        db.transaction( () => {
+            crud( '"rollback"', () => {
+                db.rollback( () => {
+                    log( "rolled back" );
+                    all_done();
+                }, fail );
+            } );
+        } );
+    }
+
+    function trx_cmt() {
+        db.transaction( () => {
+            crud( '"commit"', () => {
+                db.commit( () => {
+                    log( "committed" );
+                    trx_roll();
+                }, fail );
+            } )
+        } );
+    }
+
+    function no_trx() {
+        crud( '"foo."', trx_cmt );
+    }
+
+    no_trx();
 
 }, fail );
 
