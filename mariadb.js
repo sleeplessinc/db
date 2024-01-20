@@ -28,7 +28,7 @@ const { log, error, } = console;
 let pool = null;
 
 
-function connect( opts, done, fail ) {
+async function connect( opts, done, fail ) {
 
     if( pool == null )
         pool = mariadb.createPool( opts );

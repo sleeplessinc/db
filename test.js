@@ -14,8 +14,7 @@ function testOkay( a ) {
 
 require( "." ).mariadb.connect( process.env, db => {
 
-    log( db );
-    db.select( "select 1", [], log, console.error );
+    db.select( "select * from persons limit 1", [], log, console.error );
     db.release();
 
 }, console.error );
