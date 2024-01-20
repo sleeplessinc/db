@@ -16,6 +16,7 @@ const db = require( "." );
 log( Object.keys( db ) );
 log( Object.keys( db.mysql ) );
 log( Object.keys( db.mysql8 ) );
+log( Object.keys( db.mariadb ) );
 
 /*
 

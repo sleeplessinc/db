@@ -1,6 +1,6 @@
 {
   "name": "db",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Some code for accessing databases",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {
@@ -12,6 +12,7 @@
     "url": "https://sleeplessinc@github.com/sleeplessinc/db.git"
   },
   "dependencies": {
+    "mariadb": "^3.2.3",
     "mysql": "^2.18.1",
     "mysql8": "^2.17.3",
     "sleepless": "^6.0.2"
