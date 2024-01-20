@@ -78,8 +78,8 @@ async function connect( opts, done, fail ) {
         }
 
         function insert(sql, args, done, fail) {
-            return query( sql, args, res => {
-                done( res.insertId );
+            return query( sql, args, ( res, meta ) => {
+                done( Number( res.insertId ) );
             }, fail );
         }
 
