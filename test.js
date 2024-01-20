@@ -6,7 +6,7 @@ const assert = require("node:assert");
 
 
 function fail( error ) {
-    error( error );
+    console.error( error );
 } 
 function testOkay( a ) {
 	log( "OKAY: " + o2j(a) );
@@ -14,10 +14,44 @@ function testOkay( a ) {
 
 require( "." ).mariadb.connect( process.env, db => {
 
-    db.select( "select * from persons limit 1", [], log, console.error );
-    db.release();
+    function ins( val, done ) {
+        log( "insert: "+val );
+        db.insert( "insert into audit ( content ) values ( ? )", [ val ], done, fail );
+    }
+    function sel( id, done ) {
+        log( "select: "+id );
+        db.select( "select * from audit where id = ?", [ id ], done, fail );
+    }
+    function upd( val, id, done ) {
+        log( "update: "+id+", "+val );
+        db.select( "update audit set content = ? where id = ?", [ val, id ], done, fail );
+    }
+    function del( id, done ) {
+        log( "delete: "+id );
+        db.delete( "delete from audit where id = ? limit 1", [ id ], done, fail );
+    }
 
-}, console.error );
+    ins( '"foo"', id => {
+        log( id );
+        sel( id, rec => {
+            log( rec );
+            upd( '"bar"', id, aff => {
+                log( aff );
+                sel( id, rec => {
+                    log( rec );
+                    del( id, aff => {
+                        log( aff );
+                        sel( id, rec => {
+                            log( rec );
+                            db.release();
+                        } );
+                    } );
+                } );
+            } );
+        } );
+    } );
+
+}, fail );
 
 
 /*
