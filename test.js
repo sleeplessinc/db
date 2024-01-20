@@ -1,22 +1,25 @@
 
 const { log, o2j, } = require( "sleepless" );
 
-const test = require("test");
+//const test = require("test");
 const assert = require("node:assert");
 
 
 function fail( error ) {
-    console.error( error );
+    error( error );
 } 
 function testOkay( a ) {
 	log( "OKAY: " + o2j(a) );
 }
 
-const db = require( "." );
-log( Object.keys( db ) );
-log( Object.keys( db.mysql ) );
-log( Object.keys( db.mysql8 ) );
-log( Object.keys( db.mariadb ) );
+require( "." ).mariadb.connect( process.env, db => {
+
+    log( db );
+    db.select( "select 1", [], log, console.error );
+    db.release();
+
+}, console.error );
+
 
 /*
 
