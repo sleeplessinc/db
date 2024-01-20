@@ -23,7 +23,6 @@ IN THE SOFTWARE.
 const mariadb = require( "mariadb/callback" );
 
 const { o2j, } = require( "sleepless" );
-const { log, error, } = console;
 
 let pool = null;
 
@@ -36,12 +35,9 @@ async function connect( opts, done, fail ) {
     pool.getConnection( ( err, cnx ) => {
         
         if( err ) {
-            log( "connect fail", err );
             fail( err );
             return;
         }
-
-        log( "connect okay", cnx );
 
         let db = {};
         
