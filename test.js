@@ -14,11 +14,12 @@ function testOkay( a ) {
 	log( "OKAY: " + o2j(a) );
 }
 
-require( "." ).mariadb.connect( process.env, db => {
+require( "." ).mariadb.create( process.env ).connect( db => {
 
     function all_done() {
         log( "All done" );
         db.release();
+        process.exit( 0 );
     }
 
     function crud( data, done ) {

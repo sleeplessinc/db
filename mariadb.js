@@ -24,116 +24,120 @@ const mariadb = require( "mariadb/callback" );
 
 const { o2j, } = require( "sleepless" );
 
-let pool = null;
+
+function create( opts ) {
+
+    let pool = mariadb.createPool( opts );
+
+    async function connect( done, fail ) {
+
+        pool.getConnection( ( err, cnx ) => {
+     
+            if( err ) {
+                fail( err );
+                return;
+            }
+
+            let db = {};
+            
+            function release() {
+                cnx.release();  // back to pool
+                cnx = null;
+            }
+
+            function query( sql, args, done, fail ) {
+                cnx.query( sql, args, ( err, res ) => {
+                    if( err ) {
+                        fail( err );
+                    } else {
+                        done( res );
+                    }
+                });
+                return db;
+            };
+
+            function select( sql, args, done, fail ) {
+                return query( sql, args, done, fail );
+            }
+
+            function update(sql, args, done, fail) {
+                return query( sql, args, res => {
+                    done( res.affectedRows );
+                }, fail);
+            }
+
+            function insert(sql, args, done, fail) {
+                return query( sql, args, ( res, meta ) => {
+                    done( Number( res.insertId ) );
+                }, fail );
+            }
+
+            function delete_fn( sql, args, done, fail ) {
+                return query( sql, args, res => {
+                    done( res.affectedRows );
+                }, fail );
+            }
+
+            function transaction( done, fail ) {
+                cnx.beginTransaction( err => {
+                    if( err ) {
+                        fail( err );
+                    } else {
+                        done( db );
+                    }
+                } );
+                return db;
+            }
+
+            function commit( done, fail ) {
+                cnx.commit( err => {
+                    if( err ) {
+                        fail( err );
+                    } else {
+                        done( db );
+                    }
+                } );
+                return db;
+            }
+
+            function rollback( done, fail ) {
+                cnx.rollback( err => {
+                    if( err ) {
+                        fail( err );
+                    } else {
+                        done( db );
+                    }
+                } );
+                return db;
+            }
 
 
-async function connect( opts, done, fail ) {
+            db = {
+                // get_recs,       // deprecate
+                // get_one,        // deprecate
+                // get_one_rec,    // deprecate
+                release,
+                query,
+                select,
+                update,
+                insert,
+                delete: delete_fn,
+                transaction,
+                commit,
+                rollback,
+            };
 
-    if( pool == null )
-        pool = mariadb.createPool( opts );
+            done( db );
+        } );
 
-    pool.getConnection( ( err, cnx ) => {
-        
-        if( err ) {
-            fail( err );
-            return;
-        }
+    }
 
-        let db = {};
-        
-        function release() {
-            cnx.release();  // back to pool
-            cnx = null;
-        }
+    return { connect };
 
-        function query( sql, args, done, fail ) {
-            cnx.query( sql, args, ( err, res ) => {
-                if( err ) {
-                    fail( err );
-                } else {
-                    done( res );
-                }
-            });
-            return db;
-        };
-
-        function select( sql, args, done, fail ) {
-            return query( sql, args, done, fail );
-        }
-
-        function update(sql, args, done, fail) {
-            return query( sql, args, res => {
-                done( res.affectedRows );
-            }, fail);
-        }
-
-        function insert(sql, args, done, fail) {
-            return query( sql, args, ( res, meta ) => {
-                done( Number( res.insertId ) );
-            }, fail );
-        }
-
-        function delete_fn( sql, args, done, fail ) {
-            return query( sql, args, res => {
-                done( res.affectedRows );
-            }, fail );
-        }
-
-        function transaction( done, fail ) {
-            cnx.beginTransaction( err => {
-                if( err ) {
-                    fail( err );
-                } else {
-                    done( db );
-                }
-            } );
-            return db;
-        }
-
-        function commit( done, fail ) {
-            cnx.commit( err => {
-                if( err ) {
-                    fail( err );
-                } else {
-                    done( db );
-                }
-            } );
-            return db;
-        }
-
-        function rollback( done, fail ) {
-            cnx.rollback( err => {
-                if( err ) {
-                    fail( err );
-                } else {
-                    done( db );
-                }
-            } );
-            return db;
-        }
+}
 
 
-        db = {
-            // get_recs,       // deprecate
-            // get_one,        // deprecate
-            // get_one_rec,    // deprecate
-            release,
-            query,
-            select,
-            update,
-            insert,
-            delete: delete_fn,
-            transaction,
-            commit,
-            rollback,
-        };
-
-        done( db );
-    } );
-
-};
-
-module.exports = { connect };
+module.exports = { create };
 
 
 
