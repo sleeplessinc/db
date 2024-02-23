@@ -32,7 +32,7 @@ function create( opts ) {
     async function connect( done, fail ) {
 
         pool.getConnection( ( err, cnx ) => {
-     
+
             if( err ) {
                 fail( err );
                 return;
@@ -41,7 +41,7 @@ function create( opts ) {
             let db = {};
             
             function release() {
-                cnx.release();  // back to pool
+                cnx.end();  // back to pool
                 cnx = null;
             }
 
