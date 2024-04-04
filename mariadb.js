@@ -29,7 +29,7 @@ function create( opts ) {
 
     let pool = mariadb.createPool( opts );
 
-    async function connect( done, fail ) {
+    function connect( done, fail ) {
 
         pool.getConnection( ( err, cnx ) => {
 
