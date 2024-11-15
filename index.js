@@ -31,6 +31,7 @@ exports.connect = function(type, cfg) {
 exports.mysql = require( "./mysql.js" );
 exports.mysql8 = require( "./mysql8.js" );
 exports.mariadb = require( "./mariadb.js" );
+exports.mariadb2 = require( "./mariadb2.js" );
 
 
 
